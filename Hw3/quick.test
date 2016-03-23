@@ -1,0 +1,19 @@
+Expr
+  isAbstract=true
+  Args
+  Methods
+  Classes
+    IntExpr
+      isAbstract=false
+      Args
+        private int value
+      Methods
+      Classes
+    BinExpr
+      isAbstract=false
+      Args
+        private char op
+        private Expr left
+        private Expr right
+      Methods
+      Classes

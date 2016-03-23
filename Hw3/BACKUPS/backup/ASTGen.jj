@@ -1,0 +1,67 @@
+
+
+PARSER_BEGIN(ASTGen)
+
+public class ASTGen {
+	public static void main(String args[]) throws ParseException {
+		new ASTGen(System.in);
+		Top();
+		System.out.println("Input is valid");
+	}
+}
+
+PARSER_END(ASTGen)
+
+//-- Define the grammatical rules of the input language: ---------------------
+
+
+void Top() : { } { 
+	(Class())* <EOF>
+}
+
+void Class() : { } { 
+	("abstract")? 
+	"class" Id() 
+	("(" Args() ")")?
+	("{" (Class())* "}")?
+}
+
+void Args() : { } { 
+	(Arg() ("," Arg())*)?
+}
+
+void Arg() : { } { 
+	("public" | "protected" | "private")? Type() Id()
+}
+
+void Type() : {} {
+	NameType() ("[" "]")*
+}
+
+void NameType() : {} {
+	Id() ("." Id())*
+}
+
+void Id() : {} {
+	<IDENT>
+}
+//-- Define the lexical structure of an input language: ----------------------
+
+
+SKIP : {
+  " "
+| "\t"
+| "\n"
+| "\r"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+// Lexemes that should be reported as valid tokens:
+
+
+TOKEN : {
+	<IDENT : <START> (<PART>)*>
+|	<#START : ["a"-"z", "A"-"Z"]>
+|	<#PART : <START> | ["0"-"9", "_"]>
+}

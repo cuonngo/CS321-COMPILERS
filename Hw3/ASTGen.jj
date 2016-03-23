@@ -1,0 +1,176 @@
+
+
+PARSER_BEGIN(ASTGen)
+
+public class ASTGen {
+	public static void main(String args[]) throws ParseException {
+		new ASTGen(System.in);
+		Class [] classes = Top();
+//		Class.indent(new IndentOutput(System.out), 0, classes);
+		Class.java(new JavaOutput(System.out), 0, classes, null, null, null);
+	}
+}
+
+PARSER_END(ASTGen)
+
+//-- Define the grammatical rules of the input language: ---------------------
+
+
+Class [] Top() : {Class [] classes; } { 
+	//Classes() <EOF> | EMPTY
+	(classes=Classes(0, null, null) | {return new Class[0];}) <EOF>{
+		return classes;
+	}
+}
+
+Class [] Classes(int soFar, Args argList, Methods methodList) : {Class c; Class [] classes; } {
+	//Class() | (Classes())*
+	c=Class(argList, methodList)
+	(classes = Classes(soFar+1, argList, methodList) | {classes = new Class[soFar+1];})
+	{ classes[soFar] = c; return classes;}
+}
+
+Class Class(Args argList, Methods methodList) : {boolean isAbstract; String name; Class [] subclasses; Args args; Methods methods = null;} { 
+	/*("abstract")? 
+	"class" Id() 
+	("(" Args() ")")?
+	("{" Method()* (Class())* "}")?*/
+
+	("abstract" {isAbstract = true;} | {isAbstract = false;})
+	("class" name=Id())
+	("(" args=ListArg(argList) ")" | {args = argList;})
+ 	(("{" 
+	(methods=ListMethod(methodList) | {methods = methodList;}) 
+	((subclasses=Classes(0, args, methods)) | {subclasses = new Class[0];}) "}")
+	 | {subclasses = new Class[0];}){
+		return new Class(isAbstract, name, args, methods, subclasses);
+	}
+
+
+	
+}
+
+Args ListArg(Args argList) : {Arg a;}{
+	//Arg() Args()
+	a = Arg() { argList = new Args(argList, a);}{
+		return Args(argList);
+	}
+}
+
+Args Args(Args as) : {Args list; Arg after;} { 
+	//("," Arg())*)?
+
+	("," after = Arg() {as = new Args(as, after); as=Args(as);} | {return as;}){
+		return as;
+	} 
+}
+
+Arg Arg() : {Token token; String vis, id; Type t; } { 
+	//("public" | "protected" | "private")? Type() Id()
+	(token = "public" {vis = token.image;}
+	 |token = "protected" {vis = token.image;}
+	 |token = "private" {vis = token.image;}
+	 |{vis = null;})
+	t = Type()
+	id = Id(){
+		return new Arg(vis, t, id);
+	}
+
+}
+
+Methods ListMethod(Methods methodList) : {Method last;} {
+	//Methods()
+	last = Method() { methodList = new Methods(methodList, last);} {
+		return Methods(methodList);
+	}
+
+}
+
+Methods Methods(Methods before) : {Method last;} {
+	//(Method())*
+
+	(last = Method() {before = new Methods(before, last); before = Methods(before);} | {return before;}){
+
+		return before;
+
+	}
+	
+}
+
+Method Method() : {Type t; String id; Param[] params;} {
+	//(Type())?
+	//Id()
+	//("(" (Param())? ")")
+
+	t=Type()
+	id=Id()
+	("(" ((params=Params(0)) | {params = new Param[0];})")") {
+		return new Method(t, id, params);
+	}
+}
+
+
+Param [] Params(int soFar) : {Param param; Param [] params; } {
+	//Param() ("," Param())*
+	param=Param() ("," params = Params(soFar+1) | {params = new Param[soFar + 1]; }){
+		params[soFar] = param;
+		return params;
+	}
+}
+
+Param Param() : {Type t; String id;} {
+	t=Type()
+	id=Id() {
+		return new Param(t, id);
+	}
+}
+
+Type Type() : {Type t; ArrayType arrayT;} {
+	//NameType() ("[" "]")*
+	t = NameType()
+	("[" "]" {t = new ArrayType(t);})*{
+		return t;
+	}
+}
+
+Type NameType() : {String [] str;} {
+	//StringArray()
+	str = StringArray(0){
+		return new NameType(str);
+	}
+}
+
+String [] StringArray(int soFar) : {String [] s; String str;} {
+	//Id() ("." Id())*
+	str=Id()("." s=StringArray(soFar+1) | {s = new String[soFar + 1]; }){
+		s[soFar] = str;
+		return s;
+	}
+}
+
+String Id() : {Token t;} {
+	//IDENT
+	t=<IDENT>{
+		return t.image;
+	}
+}
+//-- Define the lexical structure of an input language: ----------------------
+
+
+SKIP : {
+  " "
+| "\t"
+| "\n"
+| "\r"
+| <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+| <"/*" (~["*"])* ("*" | ~["*","/"] (~["*"])* "*")* "/">
+}
+
+// Lexemes that should be reported as valid tokens:
+
+
+TOKEN : {
+	<IDENT : <START> (<PART>)*>
+|	<#START : ["a"-"z", "A"-"Z"]>
+|	<#PART : <START> | ["0"-"9"]>
+}

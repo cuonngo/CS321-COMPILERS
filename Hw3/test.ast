@@ -1,0 +1,6 @@
+class BinArithExpr {                                                                                                   
+
+        class Add(Position pos, Expr left, Expr right)                                                                 
+                String label()                                                                                         
+                public void print(TextOutput out)                                                                      
+}   

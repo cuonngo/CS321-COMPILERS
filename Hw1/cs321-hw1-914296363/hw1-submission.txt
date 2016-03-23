@@ -1,0 +1,85 @@
+------------------------------------------------------------------
+Name: Cuong Ngo
+Id: 914296363
+------------------------------------------------------------------
+Part 1:
+p1 :20
+p2 :15
+p3 :12
+p4 :12
+p5 :05
+p6 :15
+p7 :18
+p8 :07
+p9 :15
+p10:05
+p11:06
+p12:06
+p13:07
+p14:18
+p15:07
+p16:20
+p17:06
+p18:06
+p19:05
+p20:18
+------------------------------------------------------------------
+Part 2:
+p2.mini
+int i; i = false;
+
+This mini language causes an error in type checking phrase (15), but works on the prior-phases.
+This language did not invoke any errors in source input, lexicial analysis, and parser phrases.
+In source input phrase, all it does is reading data into a sequence of characters or line.
+The source input phrase did not cause any error becasue it did not detect any invalid sequence of chracters
+all it does is reading in each line and print out the string.
+In lexical analysis, all it does is convert the input stream of characters into a stream of tokens.
+There wasn't any problem with the lexical analysis. It did not detect any bad tokens.
+In parser phrase, it builds data structures and determines whether inputs are grammatically well-formed.
+This phrase created an abstract syntax tree and ran a method called parseprogram() to check if it's
+grammatically well-formed. For this language, it's in well-formed. The Id nodes "i" were assigned.
+However, there's a problem in type checking phrase. The TypeAnalysis function analysis over the 
+abstract syntax trees and sees that the int variable is assigned to a boolean value.
+------------------------------------------------------------------
+Part 3:
+
+boolean a;
+a = true;
+while(a)
+{
+print 1;
+}
+
+The output of this file through Version 21:
+        .file   "p100.s"
+        .globl  _Main_main
+_Main_main:
+        pushl   %ebp
+        movl    %esp,%ebp
+        subl    $4,%esp
+        movl    $1,%eax
+        movl    %eax,-4(%ebp)
+        jmp     l1
+l0:
+        movl    $1,%eax
+        pushl   %eax
+        call    _print
+        addl    $4,%esp
+l1:
+        movl    $1,%eax
+        orl     %eax,%eax
+        jnz     l0
+        movl    %ebp,%esp
+        popl    %ebp
+        ret
+
+
+In this program, there is an inifinity loop. The compiler did not print out any errors or warning messages.
+I think it would be useful if the compiler report an error or a warning message indicating that there is
+an infinity loop in the mini program. I think it is reasonable for a compiler to be able to detect problems of this kind
+because it would save a lot of time for the programmer if they accidently wrote an infinity loop. Instead of skimming through
+his code, the programmer could have saved a lot of time if there was an error or warning messages about infinity loop.
+
+
+
+------------------------------------------------------------------

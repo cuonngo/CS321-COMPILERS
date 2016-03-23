@@ -1,0 +1,98 @@
+abstract class Expr(protected Position pos) {
+	abstract class BinExpr(protected Expr left, protected Expr right) {
+		abstract class BinArithExpr {
+			class Add
+			class Sub
+			class Mul
+			class Div
+		}
+		abstract class BinBitwiseExpr {
+			class BOr
+			class BAnd
+			class BXor			
+		}
+		abstract class BinLogicExpr {
+			class LAnd
+			class LOr
+		}
+		abstract class BinCompExpr {
+			class Lt
+			class Lte
+			class Gt
+			class Gte
+		}
+		abstract class BinEqualityExpr {
+			class Eql
+			class Neq
+		}
+	}
+	abstract class UnExpr(protected Expr exp) {
+		class BNot
+		class LNot
+		abstract class UnArithExpr {
+			class UMinus
+			class UPlus
+		}
+	}
+	class ArrayAccess(protected Expr arr, protected Expr idx) {
+		class ArrayAssign(private Expr rhs)
+	}
+	class IntLit(private int num)
+	class Id(String name)
+	class BoolLit(private boolean value)
+	class Assign(private Id lhs, private Expr rhs)
+	class NewArray(private Type type, private Expr size)
+}
+abstract class Stmt {
+	abstract class PosStmt(protected Position pos) {
+		class For(InitStmt first, StepStmt test, StepStmt step, Stmt body)
+		class If(private Expr test, private Stmt ifTrue, private Stmt ifFalse)
+		class While(private Expr test, private Stmt body)
+		class Print(private Expr exp)
+	}
+	abstract class InitStmt {
+		abstract class StepStmt {
+			class ExprStmt(private Expr expr)
+			class Empty
+		}
+		//used is initialized by 1 when constructur is called!
+		class VarDecl(private Type type, private VarIntro[] intros, private int used)
+	}
+	class Block
+}
+abstract class Type {
+	class PrimType(private String typename)
+	class ArrayTyp(private Type elem)
+}
+class VarIntro(protected Id id) {
+	class InitVarIntro(private Expr expr)
+}
+class IdList(Id head,  IdList rest)
+class Env(private Id id, private Type type, private Env rest)
+class VarSet(private Env head, private VarSet rest)
+class IndentOutput(private java.io.PrintStream out)
+
+//These classes are extends from Phase. But Phase are not present in ast folder!
+class InitAnalysis
+class ScopeAnalysis
+class TypeAnalysis
+
+//The DotOutput and DotEnvOutput classes both have two constructors. 
+//My best attempt to match the structure is adding another argument "String filename"
+//because the constructor can take only the "String filename" as an arguement!
+class DotOutput(protected java.io.PrintStream out, String filename)
+class DotEnvOutput(protected java.io.PrintStream out, String filename)
+
+//This one has 3 constructors!!! One constructur take out, Second takes filename, third takes empty!
+class TextOutput(java.io.PrintStream out, String filename) {
+	class HTMLOutput
+}
+
+class TestDot
+class TestDotEnv
+class TestHTML
+class TestIndent
+class TestInit
+class TestScoping
+class TestText
+class TestTyping

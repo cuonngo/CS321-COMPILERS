@@ -1,0 +1,42 @@
+class Class(private boolean isAbstract, private String name, private Args args, private Class[] subclasses)
+
+class Args(Args before, Args last)
+
+abstract class sdfsd{ }
+
+class Arg(private String visibility, private Type type, private String id)
+
+abstract class Type {
+	class NameType(private String[] ids)
+	class ArrayType(private Type elem)
+}
+
+abstract class Expr {
+	class IntExpr (private int value)
+	abstract class BinExpr(protected Expr left, protected Expr right) {
+		class AddExpr
+		class SubExpr
+		class MultExpr
+		class DivExpr
+	}
+}
+
+
+abstract class Expr {
+	class IntExpr (private int value)
+	class BinExpr (private char op, private Expr left, private Expr right)
+}
+
+abstract class RegExp{
+	class Epsilon
+	class Char(private int c)
+	class Alt(private RegExp r1, private RegExp r2)
+	class Rep(private RegExp r)
+	class Seq(private RegExp r1, private RegExp r2)
+}
+
+class A(java.lang.Integer a1, boolean a2) {
+	class B(int [] b1, boolean [] [] b2) {
+		class C(int C1, boolean C2)
+	}
+}

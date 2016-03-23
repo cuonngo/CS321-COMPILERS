@@ -1,0 +1,4 @@
+int a;
+int b =5;
+int c = 6;
+int d , e = 7;

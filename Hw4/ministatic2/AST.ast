@@ -1,0 +1,309 @@
+/***	abstract Expr
+		abstract BinExpr
+			abstract BinArithExpr 
+				Add
+				Sub
+				Mul
+				Div
+			abstract BinBitwiseExpr
+				BOr
+				BAnd
+				BXor
+			abstract BinLogicExpr
+				LAnd
+				LOr
+			abstract BinCompExpr
+				Lt
+				Lte
+				Gt
+				Gte
+			abstract BinEqualityExpr
+				Eql
+			abstract BinEqualityExpr
+				Neq
+		abstract UnExpr
+			BNot	
+			LNot
+			abstract UnArithExpr
+				UMinus
+				UPlus
+		ArrayAccess
+			ArrayAssign
+		IntLit
+		Id
+		BoolLit
+		Assign
+		NewArray
+	Stmt
+		abstract PosStmt
+			For
+			If
+			While
+			Print
+		abstract InitStmt
+			StepStmt
+				ExprStmt
+				Empty
+			VarDecl
+		Block
+	abstract Type
+		PrimType
+		ArrayType
+	Phase?	
+		InitAnalysis
+		ScopeAnalysis
+		TypeAnalysis
+	VarIntro
+		InitVarIntro
+	VarSet
+	IdList
+	TextOutput
+		HTMLOutput
+	IndentOutput
+	DotEnvOutput
+	DotOutput
+	TestDotEnv
+	TestDot
+	TestHTML
+	TestIndent
+	TestInit
+	TestScoping
+	TestText
+	TestTyping
+**/
+
+abstract class Expr(protected Position pos) {
+	String coordString()
+	void indent(IndentOutput out, int n)		//abstract
+	void print(TextOutput out)			//abstract
+	void parenPrint(TextOutput out)
+	int toDot(DotOutput dot, int p, String attr, int n)
+	int toDot(DotOutput dot, int n)			//abstract
+	int node(DotOutput dot, String lab, int n)
+	void analyze(ScopeAnalysis scoping, Env env)	//abstract
+	//protected Type type = null
+	Type analyze(TypeAnalysis typing)		//abstract
+	Type require(TypeAnalysis typing, Type expected)
+	Type require(TypeAnalysis typing, Type expected, Type alternative)
+	VarSet analyze(InitAnalysis init, VarSet initialized)	//abstract
+
+	abstract class BinExpr(protected Expr left, protected Expr right) {
+		String label()					//abstract
+		void binary(TextOutput out, String op)
+		void requireSame(TypeAnalysis typing, Type lt, Type rt)
+		VarSet analyze(InitAnalysis init, VarSet initialized)
+		abstract class BinArithExpr{
+			class Add
+			class Sub
+			class Mul
+			class Div
+		}
+		abstract class BinBitwiseExpr{
+			class BOr
+			class BAnd
+			class BXor
+		}
+		abstract class BinLogicExpr{
+			class LAnd
+			class LOr
+		}
+		abstract class BinCompExpr{
+			class Lt
+			class Lte
+			class Gt
+			class Gte
+		}
+		abstract class BinEqualityExpr{
+			class Eql
+		}
+		abstract class BinEqualityExpr{
+			class Neq
+		}
+	}
+	abstract class UnExpr(protected Expr exp) {
+		String label()				//abstract
+		void unary(TextOutput out, String op)
+
+		class BNot
+		class LNot
+		abstract class UnArithExpr{
+			class UMinus
+			class UPlus
+		}
+	}
+	class ArrayAccess(protected Expr arr, protected Expr idx){
+		class ArrayAssign(private Expr rhs)
+	}
+	class IntLit(private int num) {
+		String toString()
+		
+	}
+	class Id(String name) {
+		String toString()
+		//private Env v = null;
+		Env extend(Type type, Env env)
+		String getName()
+		void dotEnv(DotEnvOutput dot)
+		void printText(TextOutput out)
+		void printDefHTML(HTMLOutput html)
+		void printUseHTML(HTMLOutput html)
+	}
+	class BoolLit(private boolean value)
+	class Assign(private Id lhs, private Expr rhs)
+	class NewArray(private Type type, private Expr size)
+
+}
+abstract class Stmt{
+	void indent(IndentOutput out, int n)			//abstract
+	void print(TextOutput out, int n)			//abstract
+	void printThenElse(TextOutput out, int n, Stmt elseStmt)
+	void printElse(TextOutput out, int n)
+	void printProgram(TextOutput out)
+	int toDot(DotOutput dot, int p, String attr, int n)
+	int toDot(DotOutput dot, int n)				//abstract
+	int node(DotOutput dot, String lab, int n)
+	Env analyze(ScopeAnalysis scoping, Env env)		//abstract
+	void dotEnv(DotEnvOutput dot)				//abstract
+	void analyze(TypeAnalysis typing)			//abstract
+	VarSet analyze(InitAnalysis init, VarSet initialized)	//abstract
+	
+	abstract class PosStmt(protected Position pos){
+		String coordString()
+		class For(InitStmt first, StepStmt test, StepStmt step, Stmt body)
+		class If(private Expr test, private Stmt ifTrue, private Stmt ifFalse)
+		class While(private Expr test, private Stmt body)
+		class Print(private Expr exp)
+	}
+	abstract class InitStmt{
+		void print(TextOutput out)			//abstract
+                abstract class StepStmt{
+			class ExprStmt(private Expr expr)
+                        class Empty
+                }
+		class VarDecl(private Type type, private VarIntro[] intros, private int used){
+			void addIntro(VarIntro intro)
+		}
+	}
+	class Block {
+		//private Stmt[] stmts = new Stmt[2];
+		//private int used = 0;
+		void addStmt(Stmt stmt)
+		void printBlock(TextOutput out, int n)
+	}
+}
+
+
+abstract class Type{
+	//public static final Type INT = new PrimType("int");
+	//public static final Type BOOLEAN = new PrimType("boolean");
+	int toDot(DotOutput dot, int p, String attr, int n)
+	int toDot(DotOutput dot, int n)
+	boolean equal(Type that)			//abstract
+	boolean equalPrimType(PrimType that)		//abstract
+	boolean equalArrayType(ArrayType that)		//abstract
+	Type elemType()
+	String color(Type type)				//static
+	class PrimType(private String typename) {
+		String toString()
+	}
+	class ArrayType(private Type elem) {
+		String toString()
+	}
+
+}
+
+class Phase(Handler handler){
+	void analyze(Stmt stmt)
+	class InitAnalysis
+	class ScopeAnalysis
+	class TypeAnalysis
+}
+class VarIntro(protected Id id) {
+	void indent(IndentOutput out, int n)
+	void print(TextOutput out)
+	int toDot(DotOutput dot, int p, String attr, int n)
+	int toDot(DotOutput dot, int n)
+	Env extend(ScopeAnalysis scoping, Env env, Type type)
+	void dotEnv(DotEnvOutput dot)
+	void analyze(TypeAnalysis typing, Type type)
+	VarSet analyze(InitAnalysis init, VarSet initialized)
+	class InitVarIntro(private Expr expr)
+}
+
+class VarSet(private Env head, private VarSet rest) {
+	boolean includes(Env cand, VarSet vars)
+	VarSet trim(VarSet start, VarSet end)
+	VarSet union(VarSet left, VarSet right)
+	VarSet intersect(VarSet left, VarSet right)
+	String toString(VarSet vs)
+}
+
+class IdList(Id head, IdList rest)
+
+class TextOutput(protected java.io.PrintStream out){
+	//3 contructors
+	void TextOutput(String filename)	//This is the 2nd Constructor
+	void TextOutput()			//This is the 3rd Constructor
+	void toText(Stmt stmt)
+	void indent(int n)
+	void indent(int n, String s)
+	void print(String s)
+	void println(String s)
+	void println()
+	void printUse(Id id)
+	void printDef(Id id)
+	class HTMLOutput{
+		//2 Constructos
+		void HTMLOutput(String filename)	//2nd Constructor
+		void toHTML(Stmt stmt)
+	}
+}
+
+class IndentOutput(private java.io.PrintStream out) {
+	void indent(Stmt stmt)
+	void indent(int n, String msg)
+}
+
+class DotEnvOutput(protected java.io.PrintStream out){
+	//2 Constructor
+	void DotEnvOutput(String filename)	//This is the 2nd Constructor
+	void dotEnv(Stmt stmt)
+	void node(int uid, String label)
+	void edge(int from, int to)
+	void node(int uid, String label, String fillcolor)
+}
+
+class DotOutput(protected java.io.PrintStream out){
+	//2 Constructor
+	void DotOutput(String filename)	//This is the 2nd Constructor
+	void toDot(Stmt stmt)
+	int node(String label, String fillcolor, int nodeNo)
+	int node(String label, int nodeNo)
+	void join(int from, int to, String attr)
+
+}
+
+class TestDotEnv{
+	void main(String[] args)
+}
+class TestDot{
+	void main(String[] args)
+}
+class TestHTML{
+	void main(String[] args)
+}
+class TestIndent{
+	void main(String[] args)
+}
+class TestInit{
+	void main(String[] args)
+}
+class TestScoping{
+	void main(String[] args)
+}
+class TestText{
+	void main(String[] args)
+}
+class TestTyping{
+	void main(String[] args)
+}

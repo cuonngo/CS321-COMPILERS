@@ -1,0 +1,5 @@
+int [] a = new int [1];
+a[0] = 1;
+print a[0];
+
+
